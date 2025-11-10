@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Узнать цену</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Контейнер для частиц */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: #000000;
+        }
+        
+        .main-container {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Стили для кнопки спойлера */
+        .spoiler-button {
+            width: 100%;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000000;
+            padding: 22px 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .spoiler-button:hover, .spoiler-button:active {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.5);
+        }
+        
+        /* Стили для скрытого контента */
+        .spoiler-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 25px 20px;
+            border-radius: 20px;
+            border: 2px solid #FFD700;
+            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.4);
+            backdrop-filter: blur(10px);
+        }
+        
+        .spoiler-content.active {
+            display: block;
+            animation: fadeInUp 0.4s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px) scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+        
+        .selected-event {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #000000;
+            font-weight: bold;
+            font-size: 18px;
+            min-height: 27px;
+            padding: 10px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .event-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .event-btn {
+            background: #000000;
+            color: #FFD700;
+            border: 2px solid #FFD700;
+            padding: 16px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .event-btn:hover, .event-btn:active {
+            background: #FFD700;
+            color: #000000;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        .event-btn.active {
+            background: #FFD700;
+            color: #000000;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            transform: scale(1.05);
+        }
+        
+        .ask-button {
+            width: 100%;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000000;
+            padding: 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .ask-button:hover, .ask-button:active {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.5);
+        }
+        
+        .ask-button:disabled {
+            background: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            border: 2px solid #999;
+        }
+        
+        /* Адаптивность для мобильных */
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .main-container {
+                max-width: 100%;
+            }
+            
+            .spoiler-button {
+                padding: 20px 15px;
+                font-size: 18px;
+                border-radius: 12px;
+            }
+            
+            .spoiler-content {
+                padding: 20px 15px;
+                border-radius: 15px;
+                margin: 0 5px;
+            }
+            
+            .event-types {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .event-btn {
+                padding: 18px 10px;
+                font-size: 15px;
+                border-radius: 10px;
+            }
+            
+            .ask-button {
+                padding: 18px;
+                font-size: 16px;
+                border-radius: 10px;
+            }
+            
+            .selected-event {
+                font-size: 16px;
+                padding: 8px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .spoiler-button {
+                font-size: 16px;
+                padding: 18px 12px;
+            }
+            
+            .event-btn {
+                font-size: 14px;
+                padding: 16px 8px;
+            }
+            
+            .ask-button {
+                font-size: 15px;
+                padding: 16px;
+            }
+            
+            .selected-event {
+                font-size: 15px;
+            }
+        }
+        
+        /* Улучшения для тач-интерфейса */
+        @media (hover: none) and (pointer: coarse) {
+            .spoiler-button:active,
+            .event-btn:active,
+            .ask-button:active {
+                transform: scale(0.98);
+            }
+            
+            .event-btn:hover {
+                transform: none;
+            }
+            
+            .event-btn.active {
+                transform: scale(1.02);
+            }
+        }
+        
+        /* Предотвращение выделения текста на мобильных */
+        .spoiler-button, .event-btn, .ask-button {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Контейнер для частиц -->
+    <div id="particles-js"></div>
+    
+    <!-- Основной контент -->
+    <div class="main-container">
+        <!-- Кнопка спойлера -->
+        <button class="spoiler-button" onclick="toggleSpoiler()">
+            УЗНАТЬ ЦЕНУ
+        </button>
+        
+        <!-- Скрытый контент -->
+        <div class="spoiler-content" id="spoilerContent">
+            <div class="selected-event" id="selectedEvent">
+                <!-- Здесь будет отображаться выбранное событие -->
+            </div>
+            
+            <div class="event-types">
+                <button class="event-btn" onclick="selectEvent('СВАДЬБА')">СВАДЬБА</button>
+                <button class="event-btn" onclick="selectEvent('ЮБИЛЕЙ')">ЮБИЛЕЙ</button>
+                <button class="event-btn" onclick="selectEvent('КОРПОРАТИВ')">КОРПОРАТИВ</button>
+                <button class="event-btn" onclick="selectEvent('БИЗНЕС МЕРОПРИЯТИЕ')">БИЗНЕС МЕРОПРИЯТИЕ</button>
+                <button class="event-btn" onclick="selectEvent('ПРЕЗЕНТАЦИЯ')">ПРЕЗЕНТАЦИЯ</button>
+                <button class="event-btn" onclick="selectEvent('ДРУГОЕ')">ДРУГОЕ</button>
+            </div>
+            
+            <button class="ask-button" id="askButton" onclick="sendToWhatsApp()" disabled>
+                СПРОСИТЬ
+            </button>
+        </div>
+    </div>
+
+    <!-- Подключаем библиотеку particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <script>
+        let selectedEvent = '';
+        
+        // Инициализация частиц (оптимизировано для мобильных)
+        particlesJS('particles-js', {
+            particles: {
+                number: {
+                    value: 30, // Меньше частиц для мобильных
+                    density: {
+                        enable: true,
+                        value_area: 800
+                    }
+                },
+                color: {
+                    value: '#FFD700'
+                },
+                shape: {
+                    type: 'circle'
+                },
+                opacity: {
+                    value: 0.5,
+                    random: true
+                },
+                size: {
+                    value: 2, // Меньше размер для мобильных
+                    random: true
+                },
+                line_linked: {
+                    enable: true,
+                    distance: 100, // Меньше расстояние для мобильных
+                    color: '#FFD700',
+                    opacity: 0.2,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 1, // Медленнее для мобильных
+                    direction: 'none',
+                    random: true,
+                    straight: false,
+                    out_mode: 'out',
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: {
+                    onhover: {
+                        enable: true,
+                        mode: 'repulse'
+                    },
+                    onclick: {
+                        enable: true,
+                        mode: 'push'
+                    },
+                    resize: true
+                },
+                modes: {
+                    repulse: {
+                        distance: 60, // Меньше расстояние для мобильных
+                        duration: 0.4
+                    },
+                    push: {
+                        particles_nb: 3 // Меньше частиц при клике
+                    }
+                }
+            },
+            retina_detect: true
+        });
+        
+        // Функция для открытия/закрытия спойлера
+        function toggleSpoiler() {
+            const spoilerContent = document.getElementById('spoilerContent');
+            spoilerContent.classList.toggle('active');
+        }
+        
+        // Функция выбора события
+        function selectEvent(eventType) {
+            selectedEvent = eventType;
+            
+            // Убираем активный класс со всех кнопок
+            const allButtons = document.querySelectorAll('.event-btn');
+            allButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Добавляем активный класс к выбранной кнопке
+            event.target.classList.add('active');
+            
+            // Показываем выбранное событие
+            document.getElementById('selectedEvent').textContent = `Выбрано: ${eventType}`;
+            
+            // Активируем кнопку "СПРОСИТЬ"
+            document.getElementById('askButton').disabled = false;
+        }
+        
+        // Функция отправки в WhatsApp
+        function sendToWhatsApp() {
+            if (!selectedEvent) {
+                alert('Пожалуйста, выберите тип события');
+                return;
+            }
+            
+            const message = `Запрос цены%0A%0A🎯 Тип мероприятия: ${selectedEvent}%0A%0A💰 Подскажите, пожалуйста, стоимость?`;
+            
+            const phoneNumber = '79993053019';
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+            
+            window.open(whatsappUrl, '_blank');
+            
+            // Закрываем спойлер после отправки
+            setTimeout(() => {
+                document.getElementById('spoilerContent').classList.remove('active');
+                
+                // Сбрасываем выбор
+                selectedEvent = '';
+                document.getElementById('selectedEvent').textContent = '';
+                document.getElementById('askButton').disabled = true;
+                
+                // Сбрасываем активные кнопки
+                const allButtons = document.querySelectorAll('.event-btn');
+                allButtons.forEach(btn => btn.classList.remove('active'));
+            }, 500);
+        }
+        
+        // Закрытие спойлера при клике вне области (только для десктопа)
+        if (window.innerWidth > 768) {
+            document.addEventListener('click', function(event) {
+                const spoilerContent = document.getElementById('spoilerContent');
+                const spoilerButton = document.querySelector('.spoiler-button');
+                
+                if (!spoilerContent.contains(event.target) && !spoilerButton.contains(event.target)) {
+                    spoilerContent.classList.remove('active');
+                }
+            });
+        }
+        
+        // Оптимизация для мобильных: предотвращение масштабирования при фокусе
+        document.addEventListener('touchstart', function() {}, {passive: true});
+    </script>
+</body>
+</html>
